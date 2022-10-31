@@ -1,7 +1,8 @@
 from Repositorios.RepositorioPartido import RepositorioPartido
 from Modelos.Partido import Partido
 
-class ControladorPartido():
+
+class ControladorPartido:
     def __init__(self):
         print("Creando ControladorPartido")
         self.repositorioPartido = RepositorioPartido()
@@ -10,10 +11,10 @@ class ControladorPartido():
         print("Listar todos los Partido")
         return self.repositorioPartido.findAll()
 
-    def create(self, infoPartido):
+    def create(self, info_partido):
         print("Crear un Partido")
-        nuevoPartido = Partido(infoPartido)
-        return self.repositorioPartido.save(nuevoPartido)
+        nuevo_partido = Partido(info_partido)
+        return self.repositorioPartido.save(nuevo_partido)
 
     def show(self, id):
         print("Mostrando un Partido con id", id)
