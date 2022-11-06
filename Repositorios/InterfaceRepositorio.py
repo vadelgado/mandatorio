@@ -1,13 +1,14 @@
 import pymongo
 import certifi
-from bson import DBRef
+from bson import DBRef #arcjivo JSON pero Binario
 from bson.objectid import ObjectId
-from typing import TypeVar, Generic, get_args
+from typing import TypeVar, Generic, get_args, List, get_origin
 import json
 
-T = TypeVar('T')
+T = TypeVar('T')#Variable Generica BD
 
 class InterfaceRepositorio(Generic[T]):
+   #Constructor de la clase
     def __init__(self):
         ca = certifi.where()
         dataConfig = self.loadFileConfig()
@@ -21,7 +22,7 @@ class InterfaceRepositorio(Generic[T]):
             data = json.load(f)
         return data
 
-    def save(self, item:T):
+    def save(self, item: T):
         laColeccion = self.baseDatos[self.colleccion]
         elId = ""
         item = self.transformRefs(item)
@@ -36,25 +37,27 @@ class InterfaceRepositorio(Generic[T]):
         else:
             _id = laColeccion.insert_one(item.__dict__)
             elId = _id.inserted_id.__str__()
-
-        x = laColeccion.find_one({"_id":ObjectId(elId)})
+        x = laColeccion.find_one({"_id": ObjectId(elId)})
         x["_id"] = x["_id"].__str__()
-        return  self.findById(elId)
+        return self.findById(elId)
 
+    #Borrar
     def delete(self, id):
         laColeccion = self.baseDatos[self.colleccion]
         cuenta = laColeccion.delete_one({"_id": ObjectId(id)}).deleted_count
         return {"deleted_count": cuenta}
 
+    #Actualizar
     def update(self, id, item: T):
         _id = ObjectId(id)
         laColeccion = self.baseDatos[self.colleccion]
         delattr(item, "_id")
         item = item.__dict__
         updateItem = {"$set": item}
-        x = laColeccion.update_one({"_id":_id}, updateItem)
-        return  {"updated_count":x.matched_count}
+        x = laColeccion.update_one({"_id": _id}, updateItem)#Lenguaje Mongo
+        return {"updated_count": x.matched_count}
 
+    #Funcion buscar por Id
     def findById(self, id):
         laColeccion = self.baseDatos[self.colleccion]
         x = laColeccion.find_one({"_id": ObjectId(id)})
@@ -65,6 +68,7 @@ class InterfaceRepositorio(Generic[T]):
             x["_id"] = x["_id"].__str__()
         return x
 
+    #Buscartodo en una Coleccion
     def findAll(self):
         laColeccion = self.baseDatos[self.colleccion]
         data = []
@@ -74,7 +78,7 @@ class InterfaceRepositorio(Generic[T]):
             x = self.getValuesDBRef(x)
             data.append(x)
         return data
-
+    #Consulta
     def query(self, theQuery):
         laColeccion = self.baseDatos[self.colleccion]
         data = []
@@ -84,7 +88,7 @@ class InterfaceRepositorio(Generic[T]):
             x = self.getValuesDBRef(x)
             data.append(x)
         return data
-
+    #Consulta Especifica
     def queryAggregation(self, theQuery):
         laColeccion = self.baseDatos[self.colleccion]
         data = []
@@ -95,30 +99,33 @@ class InterfaceRepositorio(Generic[T]):
             data.append(x)
         return data
 
+    #Obtener los valores de dbref
     def getValuesDBRef(self, x):
         keys = x.keys()
         for k in keys:
-            if isinstance(x[k], DBRef):
+            if isinstance(x[k], DBRef):#vienen ordenada
                 laColeccion = self.baseDatos[x[k].collection]
                 valor = laColeccion.find_one({"_id": ObjectId(x[k].id)})
                 valor["_id"] = valor["_id"].__str__()
                 x[k] = valor
                 x[k] = self.getValuesDBRef(x[k])
-            elif isinstance(x[k], list) and len(x[k]) > 0:
+            elif isinstance(x[k], list) and len(x[k]) > 0:#viene como lista
                 x[k] = self.getValuesDBRefFromLis(x[k])
             elif isinstance(x[k], dict):
                 x[k] = self.getValuesDBRef(x[k])
         return x
 
+    # obtiene los valores de ref de una lista
     def getValuesDBRefFromLis(self, theList):
         newList = []
         laColeccion = self.baseDatos[theList[0]._id.collection]
         for item in theList:
-            value = laColeccion.find_one({"_id": ObjectId(item.id)})
-            value["_id"] = value["_id"].__str__()
+            value = laColeccion.find_one({"_id": ObjectId(item.id)})#linea con comando de mongo
+            value["_id"] = value["_id"].__str__()#conv de bin a string
             newList.append(value)
         return newList
 
+#Transformamos sus objetos en sus Ids
     def transformObjectIds(self, x):
         for attribute in x.keys():
             if isinstance(x[attribute], ObjectId):
@@ -129,6 +136,7 @@ class InterfaceRepositorio(Generic[T]):
                 x[attribute] = self.transformObjectIds(x[attribute])
         return x
 
+    #Formateamos una Lista
     def formatList(self, x):
         newList = []
         for item in x:
@@ -139,6 +147,7 @@ class InterfaceRepositorio(Generic[T]):
             newList = x
         return newList
 
+    #Transforma las Referencias
     def transformRefs(self, item):
         theDict = item.__dict__
         keys = list(theDict.keys())
@@ -147,7 +156,7 @@ class InterfaceRepositorio(Generic[T]):
                 newObject = self.ObjectToDBRef(getattr(item, k))
                 setattr(item, k, newObject)
         return item
-
+    #Obtener los Objetos desde una referencia
     def ObjectToDBRef(self, item: T):
         nameCollection = item.__class__.__name__.lower()
         return DBRef(nameCollection, ObjectId(item._id))

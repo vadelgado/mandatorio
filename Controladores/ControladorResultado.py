@@ -1,12 +1,13 @@
 from Modelos.Resultado import Resultado
 from Modelos.Candidato import Candidato
 from Modelos.Mesa import Mesa
+
 from Repositorios.RepositorioResultado import RepositorioResultado
 from Repositorios.RepositorioCandidato import RepositorioCandidato
 from Repositorios.RepositorioMesa import RepositorioMesa
 
 
-class ControladorResultado:
+class ControladorResultado():
     def __init__(self):
         print("Creando ControladorResultado")
         self.repositorioResultado = RepositorioResultado()
@@ -58,3 +59,15 @@ class ControladorResultado:
     def delete(self, id):
         print("Eliminando  Resultado con id ", id)
         return self.repositorioResultado.delete(id)
+
+    def getListarCandidatosMesa(self, id_mesa):
+        print("Listar Candidatos Inscritos en Mesa")
+        return self.repositorioResultado.getListadoCandidatosInscritosMesa(id_mesa)
+
+    def getListarMesasDeIncritoCandidato(self, id_candidato):
+        print("Listar Mesas de Candidatos Inscritos")
+        return self.repositorioResultado.getListadoMesasCandidatoInscrito(id_candidato)
+
+    def getMayorCedula(self,id_resultado):
+        print("El candidato con mayor numero de Cedula es: ")
+        return self.repositorioResultado.getNumeroCedulaMayorCandidato()
