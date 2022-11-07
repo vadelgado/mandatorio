@@ -68,6 +68,6 @@ class ControladorResultado():
         print("Listar Mesas de Candidatos Inscritos")
         return self.repositorioResultado.getListadoMesasCandidatoInscrito(id_candidato)
 
-    def getMayorCedula(self,id_resultado):
-        print("El candidato con mayor numero de Cedula es: ")
-        return self.repositorioResultado.getNumeroCedulaMayorCandidato()
+    def getsumatoriaVotos(self, id_candidato):
+        print("Los votos obtenidos por el candidato son: ")
+        return self.repositorioResultado.getsumatoriaVotos(id_candidato)

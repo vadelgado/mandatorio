@@ -84,9 +84,9 @@ def inscritoEnMesa(id_candidato):
     return jsonify(json)
 
 #Buscar mayor cedula
-@app.route("/resultado/maxdocument",methods={'GET'})
-def getMaxDocument():
-    json = miControladorResultado.getMayorCedula()
+@app.route("/resultado/candidato/votos/<string:id_candidato>",methods={'GET'})
+def getMaxDocument(id_candidato):
+    json = miControladorResultado.getsumatoriaVotos(id_candidato)
     return jsonify(json)
 
 

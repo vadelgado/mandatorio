@@ -14,18 +14,17 @@ class RepositorioResultado(InterfaceRepositorio[Resultado]):
         theQuery = {"candidato.$id": ObjectId(id_candidato)}
         return self.query(theQuery)
 
-    # Número mayor de una cédula
-    def getNumeroCedulaMayorCandidato(self):
-        query = {
-            "$group":{
+    def getsumatoriaVotos(self, id_candidato):
+        consulta1 = {
+            "$match": {"candidato.$id": ObjectId(id_candidato)}
+        }
+        consulta2 = {
+            "$group": {
                 "_id": "$candidato",
-                "Total_votos_candidato": {
-                    "$sum": 1
-                },
-                "doc": {
-                    "$first": "$$ROOT"
+                "Total_Votos": {
+                    "$sum": "$numero_votos"
                 }
             }
         }
-        pipeline = [query]
+        pipeline = [consulta1, consulta2]
         return self.queryAggregation(pipeline)
