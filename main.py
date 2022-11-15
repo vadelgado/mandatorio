@@ -34,7 +34,7 @@ miControladorResultado = ControladorResultado()
 
 # ******************************************************Resultado*******************************************************#
 # obtener todos los resultados
-@app.route("/resultado/", methods=['GET'])
+@app.route("/resultado", methods=['GET'])
 def getResultados():
     json = miControladorResultado.index()
     return jsonify(json)
@@ -83,9 +83,9 @@ def inscritoEnMesa(id_candidato):
     json = miControladorResultado.getListarMesasDeIncritoCandidato(id_candidato)
     return jsonify(json)
 
-#Buscar mayor cedula
+#Buscar votos un candidato por id candidato
 @app.route("/resultado/candidato/votos/<string:id_candidato>",methods={'GET'})
-def getMaxDocument(id_candidato):
+def getvotosCandidato(id_candidato):
     json = miControladorResultado.getsumatoriaVotos(id_candidato)
     return jsonify(json)
 
